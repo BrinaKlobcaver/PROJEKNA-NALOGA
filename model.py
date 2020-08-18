@@ -21,15 +21,17 @@ class Vprasanje():
 
 
 class Kviz():
-    def __init__(self):
+    def __init__(self, st_vprasanj):
         # Prebere imena drzav iz datoteke
         with open('podatki/imena_drzav.txt', 'r', encoding='utf-8') as file:
             seznam = file.readlines()
         for i in range(len(seznam)):
             seznam[i] = seznam[i][:-1]
         self.seznam_drzav = seznam
+
         self.indeks_trenutnega_vprasanja = 0
         self.st_pravilnih_odgovorov = 0
+        self.st_vprasanj = st_vprasanj
     
     def generiraj_vprasanja(self):
         seznam_vprasanj = []
@@ -58,7 +60,7 @@ class Kviz():
         self.indeks_trenutnega_vprasanja += 1
     
     def odstotek_pravilnih(self):
-        return self.st_pravilnih_odgovorov / 50
+        return self.st_pravilnih_odgovorov / self.st_vprasanj
 
 
 
@@ -67,7 +69,6 @@ class Kviz():
 # Testiranje: 
 kviz = Kviz()
 kviz.generiraj_vprasanja()
-print(kviz.seznam_vprasanj[10].pravilni_odgovor, kviz.seznam_vprasanj[10].indeks_drzave)
 
 '''
 for i in range(5):
