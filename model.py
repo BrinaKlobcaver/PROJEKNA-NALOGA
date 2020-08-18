@@ -67,7 +67,7 @@ class Kviz():
 
 
 # Testiranje: 
-kviz = Kviz()
+kviz = Kviz(50)
 kviz.generiraj_vprasanja()
 
 '''
