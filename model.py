@@ -8,7 +8,7 @@ class Vprasanje():
         drzave_brez_pravilne = []
         for d in seznam_drzav:
             if not d == drzava:
-                drzave_brez_pravilne.append(d)
+                drzave_brez_pravilne.append(d) #doda (nepravilno) državo v seznam (na konec)
         random.shuffle(drzave_brez_pravilne) # premesa seznam
 
         odgovori = [drzava]
@@ -38,13 +38,13 @@ class Kviz():
             v = Vprasanje(drzava, i, self.seznam_drzav) # vprasanje za vsako drzavo
             seznam_vprasanj.append(v)
 
-        random.shuffle(seznam_vprasanj)
+        random.shuffle(seznam_vprasanj) #da je vedno drug vrstni red držav pri vprašanjih
 
         self.seznam_vprasanj = seznam_vprasanj
     
 
     def trenutno_vprasanje(self):
-        return self.seznam_vprasanj[self.indeks_trenutnega_vprasanja]
+        return self.seznam_vprasanj[self.indeks_trenutnega_vprasanja] #da šteje
     
     def je_odgovor_pravilen(self, odgovor):
         if odgovor == self.trenutno_vprasanje().pravilni_odgovor:
