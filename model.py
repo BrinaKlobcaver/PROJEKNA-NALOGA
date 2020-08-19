@@ -1,4 +1,5 @@
 import random
+import json
 
 class Vprasanje():
     def __init__(self, drzava, indeks_drzave, seznam_drzav):
@@ -73,23 +74,50 @@ class Kviz():
 
 
 
-'''
-# Testiranje: 
-kviz = Kviz(50)
-kviz.generiraj_vprasanja()
-
-for i in range(5):
-    vprasanje = kviz.trenutno_vprasanje()
-    for odgovor in vprasanje.odgovori:
-        print(odgovor)
-    odgovor = input()
-
-    x = kviz.je_odgovor_pravilen(odgovor)
-    if x[0] == True:
-        print('Pravilno')
-    else:
-        print('Narobe, ', x[1])
+class SeznamKvizov():
+    def __init__(self, datoteka_s_stanjem):
+        self.kvizi = {}
+        self.id_naslednjega_kviza = 0
+        self.datoteka_s_stanjem = datoteka_s_stanjem
     
-    input()
-    kviz.naslednje_vprasanje()
-'''
+    def nov_kviz(self, dolzina):
+        nov = Kviz(dolzina)
+        self.kvizi[self.id_naslednjega_kviza] = nov
+        trenutni_id = self.id_naslednjega_kviza
+        self.id_naslednjega_kviza += 1
+
+        return trenutni_id
+
+    def pretvori_kviz_v_slovar(self, kviz):
+        seznam_vprasanj = []
+        for vprasanje in kviz.seznam_vprasanj:
+            slovar = {
+                'drzava': vprasanje.pravilni_odgovor,
+                'odgovori': vprasanje.odgovori,
+                'indeks_drzave': vprasanje.indeks_drzave
+            }
+            seznam_vprasanj.append(slovar)
+
+        slovar = {
+            'st_vprasanj': kviz.st_vprasanj,
+            'indeks_trenutnega_vprasanja': kviz.indeks_trenutnega_vprasanja,
+            'pravilnost_odgovorov': kviz.pravilnost_odgovorov,
+            'seznam_drzav': kviz.seznam_drzav,
+            'seznam_vprasanj': seznam_vprasanj
+        }
+        return slovar
+
+    def shrani_v_datoteko(self):
+        slovar_kvizov = {}
+        for (id, kviz) in self.kvizi.items():
+            slovar_kvizov[id] = self.pretvori_kviz_v_slovar(kviz)
+
+
+        slovar = {
+            'datoteka_s_stanjem': self.datoteka_s_stanjem,
+            'id_naslednjega_kviza': self.id_naslednjega_kviza,
+            'kvizi': slovar_kvizov
+        }
+
+        with open(self.datoteka_s_stanjem, 'w', encoding='utf-8') as f:
+            json.dump(slovar, f)

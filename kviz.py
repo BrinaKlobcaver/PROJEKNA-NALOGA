@@ -1,7 +1,9 @@
 import bottle
 import model
 
-kviz = None
+SKRIVNOST = 'to_je_kviz'
+
+seznam_kvizov = model.SeznamKvizov('stanje.json')
 
 # Prikaz zacetne strani
 @bottle.get('/')
@@ -11,9 +13,11 @@ def index():
 
 # naredi nov kviz
 def nov_kviz(dolzina):
-    global kviz
-    kviz = model.Kviz(dolzina)
-    kviz.generiraj_vprasanja()
+    id = seznam_kvizov.nov_kviz(dolzina)
+    bottle.response.set_cookie('id', 'id{}'.format(id), secret=SKRIVNOST, path='/')
+
+    seznam_kvizov.kvizi[id].generiraj_vprasanja()
+    seznam_kvizov.shrani_v_datoteko()
     bottle.redirect('/kviz')
 
 @bottle.get('/kviz10')
@@ -31,15 +35,18 @@ def nov_kviz_50():
 
 @bottle.route('/kviz')
 def pokazi_vprasanje():
+    id = int(bottle.request.get_cookie('id', secret=SKRIVNOST).split('d')[1])
     izbrana_drzava = bottle.request.query.drzava
     
-    vprasanje = kviz.trenutno_vprasanje()
+    vprasanje = seznam_kvizov.kvizi[id].trenutno_vprasanje()
     print(len(izbrana_drzava))
 
     if len(izbrana_drzava) == 0:
         return bottle.template('views/kviz.tpl', vprasanje=vprasanje, je_ze_odgovarjal=False)
     else:
-        pravilno = kviz.je_odgovor_pravilen(izbrana_drzava)
+        pravilno = seznam_kvizov.kvizi[id].je_odgovor_pravilen(izbrana_drzava)
+        seznam_kvizov.shrani_v_datoteko()
+
         je_odgovor_pravilen = pravilno[0]
 
         pravilen_odgovor = ''
@@ -50,15 +57,19 @@ def pokazi_vprasanje():
 
 @bottle.get('/naslednje_vprasanje')
 def naslednje_vprasanje():
-    kviz.naslednje_vprasanje()
-    if kviz.ze_vse_odgovorjeno():
+    id = int(bottle.request.get_cookie('id', secret=SKRIVNOST).split('d')[1])
+
+    seznam_kvizov.kvizi[id].naslednje_vprasanje()
+    seznam_kvizov.shrani_v_datoteko()
+    if seznam_kvizov.kvizi[id].ze_vse_odgovorjeno():
         bottle.redirect('/rezultati')
     else:
         bottle.redirect('/kviz')
 
 @bottle.get('/rezultati')
 def rezultati():
-    return bottle.template('views/rezultati.tpl', odstotek_pravilnih=kviz.odstotek_pravilnih())
+    id = int(bottle.request.get_cookie('id', secret=SKRIVNOST).split('d')[1])
+    return bottle.template('views/rezultati.tpl', odstotek_pravilnih=seznam_kvizov.kvizi[id].odstotek_pravilnih())
 
 @bottle.get('/img/<picture>')
 def serve_pictures(picture):
