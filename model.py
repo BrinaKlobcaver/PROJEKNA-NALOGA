@@ -30,8 +30,9 @@ class Kviz():
         self.seznam_drzav = seznam
 
         self.indeks_trenutnega_vprasanja = 0
-        self.st_pravilnih_odgovorov = 0
         self.st_vprasanj = st_vprasanj
+
+        self.pravilnost_odgovorov = [False for i in range(50)]
     
     def generiraj_vprasanja(self):
         seznam_vprasanj = []
@@ -50,27 +51,33 @@ class Kviz():
     
     def je_odgovor_pravilen(self, odgovor):
         if odgovor == self.trenutno_vprasanje().pravilni_odgovor:
-            self.st_pravilnih_odgovorov += 1
+            self.pravilnost_odgovorov[self.indeks_trenutnega_vprasanja] = True
             return [True]
         else:
-            self.st_pravilnih_odgovorov += 0
+            self.pravilnost_odgovorov[self.indeks_trenutnega_vprasanja] = False
             return [False, self.trenutno_vprasanje().pravilni_odgovor]
     
     def naslednje_vprasanje(self):
         self.indeks_trenutnega_vprasanja += 1
     
     def odstotek_pravilnih(self):
-        return self.st_pravilnih_odgovorov / self.st_vprasanj
+        st_pravilnih_odgovorov = 0
+        for je_pravilen in self.pravilnost_odgovorov:
+            if je_pravilen:
+                st_pravilnih_odgovorov += 1
+        
+        return st_pravilnih_odgovorov / self.st_vprasanj
+    
+    def ze_vse_odgovorjeno(self):
+        return self.indeks_trenutnega_vprasanja >= self.st_vprasanj
 
 
 
-
-
+'''
 # Testiranje: 
 kviz = Kviz(50)
 kviz.generiraj_vprasanja()
 
-'''
 for i in range(5):
     vprasanje = kviz.trenutno_vprasanje()
     for odgovor in vprasanje.odgovori:
