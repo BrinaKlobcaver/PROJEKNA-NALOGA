@@ -1,5 +1,6 @@
 import random
 import json
+import os.path
 
 class Vprasanje():
     def __init__(self, drzava, indeks_drzave, seznam_drzav):
@@ -74,11 +75,14 @@ class Kviz():
 
 
 
-class SeznamKvizov():
+class SeznamKvizov(): #za več uporabnikov
     def __init__(self, datoteka_s_stanjem):
         self.kvizi = {}
         self.id_naslednjega_kviza = 0
         self.datoteka_s_stanjem = datoteka_s_stanjem
+
+        if os.path.exists(datoteka_s_stanjem): #za branje datoteke, če ta obstaja
+            self.preberi_iz_datoteke()
     
     def nov_kviz(self, dolzina):
         nov = Kviz(dolzina)
@@ -87,6 +91,7 @@ class SeznamKvizov():
         self.id_naslednjega_kviza += 1
 
         return trenutni_id
+
 
     def pretvori_kviz_v_slovar(self, kviz):
         seznam_vprasanj = []
@@ -121,3 +126,31 @@ class SeznamKvizov():
 
         with open(self.datoteka_s_stanjem, 'w', encoding='utf-8') as f:
             json.dump(slovar, f)
+    
+    def preberi_iz_datoteke(self):#da lahko nadaljuješ kviz od tam, kjer si ostal
+        with open(self.datoteka_s_stanjem, 'r', encoding='utf-8') as f:
+            slovar = json.load(f)
+        
+        self.datoteka_s_stanjem = slovar['datoteka_s_stanjem']
+        self.id_naslednjega_kviza = int(slovar['id_naslednjega_kviza'])
+        self.kvizi = {}
+        for (id, kviz_slovar) in slovar['kvizi'].items():
+            self.kvizi[int(id)] = self.pretvori_slovar_v_kviz(kviz_slovar)
+        
+    def pretvori_slovar_v_kviz(self, kviz_slovar):
+        kviz = Kviz(int(kviz_slovar['st_vprasanj']))
+        kviz.st_vprasanj = int(kviz_slovar['st_vprasanj'])
+        kviz.indeks_trenutnega_vprasanja = int(kviz_slovar['indeks_trenutnega_vprasanja'])
+        kviz.pravilnost_odgovorov = kviz_slovar['pravilnost_odgovorov']
+        kviz.seznam_drzav = kviz_slovar['seznam_drzav']
+
+        kviz.seznam_vprasanj = []
+        for vprasanje_slovar in kviz_slovar['seznam_vprasanj']:
+            vprasanje = Vprasanje(vprasanje_slovar['drzava'], vprasanje_slovar['indeks_drzave'], kviz_slovar['seznam_drzav'])
+            vprasanje.pravilni_odgovor = vprasanje_slovar['drzava']
+            vprasanje.odgovori = vprasanje_slovar['odgovori']
+            vprasanje.indeks_drzave = int(vprasanje_slovar['indeks_drzave'])
+            kviz.seznam_vprasanj.append(vprasanje)
+        
+        return kviz
+    

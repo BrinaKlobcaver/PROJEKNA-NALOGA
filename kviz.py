@@ -12,25 +12,15 @@ def index():
 
 
 # naredi nov kviz
+@bottle.get('/kviz/<dolzina>')#število vprašanj(tri funkcije v eni)
 def nov_kviz(dolzina):
-    id = seznam_kvizov.nov_kviz(dolzina)
+    id = seznam_kvizov.nov_kviz(int(dolzina))
     bottle.response.set_cookie('id', 'id{}'.format(id), secret=SKRIVNOST, path='/')
 
     seznam_kvizov.kvizi[id].generiraj_vprasanja()
     seznam_kvizov.shrani_v_datoteko()
     bottle.redirect('/kviz')
 
-@bottle.get('/kviz10')
-def nov_kviz_10():
-    nov_kviz(2)
-
-@bottle.get('/kviz25')
-def nov_kviz_25():
-    nov_kviz(25)
-
-@bottle.get('/kviz50')
-def nov_kviz_50():
-    nov_kviz(50)
 
 
 @bottle.route('/kviz')
@@ -39,11 +29,10 @@ def pokazi_vprasanje():
     izbrana_drzava = bottle.request.query.drzava
     
     vprasanje = seznam_kvizov.kvizi[id].trenutno_vprasanje()
-    print(len(izbrana_drzava))
 
-    if len(izbrana_drzava) == 0:
+    if len(izbrana_drzava) == 0:# če še nobena država ni bila izbrana
         return bottle.template('views/kviz.tpl', vprasanje=vprasanje, je_ze_odgovarjal=False)
-    else:
+    else:#če pa je odgovoril
         pravilno = seznam_kvizov.kvizi[id].je_odgovor_pravilen(izbrana_drzava)
         seznam_kvizov.shrani_v_datoteko()
 
@@ -71,9 +60,18 @@ def rezultati():
     id = int(bottle.request.get_cookie('id', secret=SKRIVNOST).split('d')[1])
     return bottle.template('views/rezultati.tpl', odstotek_pravilnih=seznam_kvizov.kvizi[id].odstotek_pravilnih())
 
+@bottle.get('/zacni-ponovno')#briše kviz iz spomina(ko klikneš zacni ponovno)
+def zacni_ponovno():
+    id = int(bottle.request.get_cookie('id', secret=SKRIVNOST).split('d')[1])
+    seznam_kvizov.kvizi.pop(id)
+    seznam_kvizov.shrani_v_datoteko()
+
+    bottle.redirect('/')#preusmeri na začetno stran
+
+
 @bottle.get('/img/<picture>')
 def serve_pictures(picture):
     return bottle.static_file(picture, root='podatki/drzave_img')
 
 
-bottle.run(reloader=True, debug=True)
+bottle.run(reloader=True, debug=True)#zažene server in izpiše naslov(http)
