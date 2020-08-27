@@ -2,7 +2,7 @@
 
 
 <h1 class="display-1">Kviz</h1>
-<h2 class="lead" >Preizkusi svoje znanje o ZDA.</h2>
+<h2 class="lead" >Ali veš kje na zemljevidu je Teksas? Kaj pa Montana? Preizkusi se zdaj.</h2>
 <p>Izberi število vprašanj: </p>
 
 <a href="./kviz/10" class="btn btn-primary">10 vprašanj</a> <br />
