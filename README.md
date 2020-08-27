@@ -7,4 +7,4 @@ Preizkusite se v kvizu o zveznih državah Amerike!
 Kviz v pythonu poženete v datoteki kviz z ukazom `python -i kviz.py`.
 
 ## Zahvala
-Za pomoč in moralno podporo pri projektni nalogi gredo zahvale Ani, Davidu in Timu.
+Za pomoč in podporo pri pisanju projektne naloge gredo zahvale Ani, Davidu in Timu.
